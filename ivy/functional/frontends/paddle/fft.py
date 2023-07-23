@@ -82,3 +82,21 @@ def ifftshift(x, axes=None, name=None):
     roll = ivy.roll(x, shifts, axis=axes)
 
     return roll
+
+
+@to_ivy_arrays_and_back
+def ifftn(x, s=None, axes=None, norm="backward", name=None):
+    if s < ivy.shape(x) or s > ivy.shape(x):
+        ivy.reshape(x, s)
+    elif s is None:
+        s = ivy.shape(x)
+
+    if axes is None:
+        if s is None:
+            axes = list(range(ivy.shape(x)))
+        else:
+            fft_ndims = len(s)
+            axes = list(range(ivy.shape(x) - fft_ndims, ivy.shape(x)))
+
+    ret = ivy.ifftn(ivy.astype(x, "complex128"), axes, norm=norm, s=s)
+    return ivy.astype(ret, x.dtype)
